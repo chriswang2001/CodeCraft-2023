@@ -30,6 +30,8 @@ private:
     double get_dth();
 
     double get_score(workbench& wb);
+    double time_estimate(workbench& wb);
+    
     void set(int target_id);
 
     void plan();

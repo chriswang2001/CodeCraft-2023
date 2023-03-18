@@ -5,7 +5,7 @@
 #include "config.h"
 #include "workbench.h"
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 extern FILE* fp;

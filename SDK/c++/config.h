@@ -1,18 +1,18 @@
 #pragma once
 
 #define MAP_INPUT_LEN 100
-#define MAP_MAX_LEN 50.f
+#define MAP_MAX_LEN 50.0
 
 #define ROBOT_NUM 4
 
-#define MAX_LINEAR_VEL 6.f
-#define MIN_LINEAR_VEL -2.f
+#define MAX_LINEAR_VEL 6.0
+#define MIN_LINEAR_VEL -2.0
 
 #define MAX_ANGULAR_VEL M_PI
 #define MIN_ANGULAR_VEL -M_PI
 
-#define ANGULAR_LIMIT 0.15f
-#define DISTANCE_LIMIT 0.5f
+#define ANGULAR_LIMIT 0.15
+#define DISTANCE_LIMIT 0.5
 
 #define WORKBENCH_NUM_MAX 50
 #define WORKBENCH_TYPE_NUM 9
@@ -24,4 +24,5 @@ extern int profit[MATERIAL_TYPE_NUM + 1];
 
 extern int find[MATERIAL_TYPE_NUM + 1][WORKBENCH_TYPE_NUM];
 
+double factor(double x, double max_x, double min_rate);
 void bitcount(int num, int* arr);

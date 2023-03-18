@@ -62,10 +62,28 @@ double robot::get_dth() {
     return dth;
 }
 
+double robot::time_estimate(workbench& wb) {
+    double dx = wb.getx() - x;
+    double dy = wb.gety() - y;
+    double d = sqrt(dx*dx + dy*dy);
+
+    double dth = atan2f(get_dy(), get_dx()) - th;
+    if(dth < -M_PI)
+        dth += 2 * M_PI;
+    else if(dth > M_PI)
+        dth -= 2 * M_PI;
+
+    double time = d/MAX_LINEAR_VEL + fabs(dth)/MAX_ANGULAR_VEL;
+
+    return time;
+}
+
 double robot::get_score(workbench& wb) {
-    int score = 0;
-    int time = wb.getTime();
-    int type = wb.getType();
+    double money = 0.0;
+    double time = 1.0;
+
+    int wb_time = wb.getTime();
+    int wb_type = wb.getType();
     
     int *arr = find[material_type];
     int n = WORKBENCH_TYPE_NUM;
@@ -75,28 +93,22 @@ double robot::get_score(workbench& wb) {
     }
 
     if(0 == material_type) {
-        if(time < 0 || need[type] - occupy[type] <= 0) {
-
+        if(wb_time < 0 || need[wb_type] - occupy[wb_type] <= 0) {
             return 0;
         }
 
-        if(time == 0)
-            score += 3000;
-        else{
-            score += 3000/time;
-        }
-        score += profit[wb.getType()] * 1.5f;
+        double road_time = time_estimate(wb);
+        time = wb_time - road_time > 0 ? wb_time : road_time;
+        money = profit[wb_type];
     } else {
         if(wb.checkMaterial(material_type)) {
             return 0;
         }
+        time = time_estimate(wb);
+        money = profit[material_type] * factor(time, 9000, 0.8);
     }
 
-    double dx = wb.getx() - x;
-    double dy = wb.gety() - y;
-    double d2 = dx*dx + dy*dy;
-
-    score += MAP_MAX_LEN * MAP_MAX_LEN / d2;
+    double score = money / time;
 
     return score;
 }
@@ -170,7 +182,7 @@ void robot::control() {
     dy = get_dy();
     dth = get_dth();
     
-    if(fabsf(dth) < ANGULAR_LIMIT) {
+    if(fabs(dth) < ANGULAR_LIMIT) {
         angular_set = 0;
         linear_set = MAX_LINEAR_VEL;
     } else{
