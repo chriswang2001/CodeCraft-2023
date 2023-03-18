@@ -1,3 +1,0 @@
-/home/whz/work/LinuxRelease/SDK/c++/CMakeFiles/rebuild_cache.dir
-/home/whz/work/LinuxRelease/SDK/c++/CMakeFiles/edit_cache.dir
-/home/whz/work/LinuxRelease/SDK/c++/CMakeFiles/main.dir

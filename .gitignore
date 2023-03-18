@@ -1,8 +1,10 @@
 .vscode/
 replay/
+CMakeFiles/
 
 debug.txt
 
 main
 
 *.o
+
