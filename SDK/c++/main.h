@@ -5,7 +5,7 @@
 #include "config.h"
 #include "work_bench.h"
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 extern FILE* fp;
@@ -16,8 +16,6 @@ extern FILE* fp;
 
 extern int work_bench_num;
 extern work_bench work_benches[WORK_BENCH_NUM_MAX];
-extern int need[MATERIAL_TYPE_NUM];
 
-extern void need_switch(int type);
-extern int need_test2[MATERIAL_TYPE_NUM];
-extern int need_test3[MATERIAL_TYPE_NUM];
+extern int need[MATERIAL_TYPE_NUM + 1];
+extern int occupy[MATERIAL_TYPE_NUM + 1];

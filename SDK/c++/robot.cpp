@@ -7,22 +7,6 @@
 #include "config.h"
 #include "main.h"
 
-int material[WORK_BENCH_TYPE_NUM+1] = {0, 0, 0, 0, 0b00000110, 0b00001010, 0b00001100, 0b01110000, 0b10000000, 0b11111110};
-
-int profit[MATERIAL_TYPE_NUM] = {3000, 3200, 3400, 7100, 7800, 8300, 29000};
-
-int find0[MATERIAL_TYPE_NUM] ={1,2,3,4,5,6,7};
-
-int find1[MATERIAL_TYPE_NUM][3] = {
-    {4, 5, 9},
-    {4, 6, 9},
-    {5, 6, 9},
-    {7, 9,-1},
-    {7, 9,-1},
-    {7, 9,-1},
-    {8, 9,-1}
-};
-
 robot::robot() {
     this->target_ID = -1;
 }
@@ -34,15 +18,13 @@ bool robot::read(const char* buffer, int ID) {
             &this->angular_vel, &this->linear_vel_x, &this->linear_vel_y, 
             &this->th, &this->x, &this->y)) {
                 if(this->material_type) {
-                    need_test2[material_type-1]++;
+                    occupy[this->material_type]++;
                 } else if(target_ID != -1){
-                    need_test2[target_Type - 1]++;
+                    occupy[this->target_Type]++;
                 }
             return true;
         }
     
-
-
     return false;
 }
 
@@ -54,8 +36,6 @@ void robot::print() {
 }
 
 double robot::score(work_bench& wb) {
-
-    int* arr, n;
     int score = 0;
     int time = wb.getTime();
     int type = wb.getType();
@@ -63,7 +43,7 @@ double robot::score(work_bench& wb) {
     //     debug("%s %d\n", __func__, __LINE__);
 
     if(0 == this->material_type) {
-        if(time < 0 || need[type-1] <= 0) {
+        if(time < 0 || need[type] - occupy[type] <= 0) {
         // debug("%s %d\n", __func__, __LINE__);
             return 0;
         }
@@ -73,17 +53,15 @@ double robot::score(work_bench& wb) {
         else{
             score += 3000/time;
         }
-        score += profit[wb.getType()-1] * 1.5f;
-        arr = find0;
-        n = MATERIAL_TYPE_NUM;
+        score += profit[wb.getType()] * 1.5f;
     } else {
         if(wb.checkMaterial(this->material_type)) {
             return 0;
         }
-        arr = find1[this->material_type-1];
-        n = 3;
     }
 
+    int *arr = find[this->material_type];
+    int n = WORK_BENCH_TYPE_NUM;
     if(wb.getRobotID() != -1 || std::find(arr, arr + n, wb.getType()) == arr + n)
     {
         // debug("%d %d %d", arr[0], n, std::find(arr, arr + n, wb.getType()));
@@ -135,10 +113,6 @@ void robot::set(int target_ID) {
 
     work_benches[target_ID].setRobotID(this->ID);
 
-    if(0 == this->material_type) {
-        need[this->target_Type - 1]--;
-    }
-
     //     debug("%s %d\n", __func__, __LINE__);
 }
 
@@ -158,9 +132,6 @@ void robot::control() {
             debug("buy %d\n", this->ID);
             if(!work_benches[target_ID].getProduct())
                 goto end;
-
-            if(work_benches[target_ID].getMaterial() == material[this->target_Type])
-                need_switch(this->target_Type);
         } else {
             printf("sell %d\n", this->ID);
             debug("sell %d\n", this->ID);
@@ -170,10 +141,6 @@ void robot::control() {
             }
 
             work_benches[target_ID].setMaterial(this->material_type);
-            debug("material:%d %d", work_benches[target_ID].getMaterial(), material[this->target_Type]);
-            if(work_benches[target_ID].getMaterial() == material[this->target_Type] && work_benches[target_ID].getTime() == -1) {
-                need_switch(this->target_Type);
-            }
         }
 
         work_benches[target_ID].setRobotID(-1);

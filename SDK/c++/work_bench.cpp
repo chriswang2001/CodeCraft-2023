@@ -4,23 +4,8 @@
 
 #include "main.h"
 
-extern int material[WORK_BENCH_TYPE_NUM+1];
-
 work_bench::work_bench() {
     this->robot_ID = -1;
-}
-
-void nt(int num) {
-    int count = 0;
-
-    while(num != 0)
-    {
-        if(num & 1)
-            need_test3[count-1]++;
-        
-        num = num >> 1;
-        count++;
-    }
 }
 
 bool work_bench::read(const char* buffer, int ID) {
@@ -29,10 +14,7 @@ bool work_bench::read(const char* buffer, int ID) {
     if(EOF != sscanf(buffer, "%d %lf %lf %d %d %d", 
         &this->type, &this->x, &this->y, 
         &this->time_left, &this->material_state, &this->product_state)) {
-            nt(this->material_state);
-            if(this->time_left == 1 && this->material_state == material[this->type] && this->product_state == 0)
-                need_switch(this->type);
-
+            bitcount(this->material_state, occupy);
             return true;
         }
 

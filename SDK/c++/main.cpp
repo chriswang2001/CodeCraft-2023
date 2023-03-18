@@ -17,40 +17,8 @@ int money, work_bench_num;
 work_bench work_benches[WORK_BENCH_NUM_MAX];
 robot robots[ROBOT_NUM];
 
-int need[MATERIAL_TYPE_NUM];
-int need_test[MATERIAL_TYPE_NUM];
-int need_test2[MATERIAL_TYPE_NUM];
-int need_test3[MATERIAL_TYPE_NUM];
-
-void need_switch(int type) {
-    if(type >= 4 && type <= 9)
-        debug("need_switch:%d\n", type);
-    
-    switch (type)
-    {
-    case 4:
-        need[0]++; need[1]++;
-        break;
-    case 5:
-        need[0]++; need[2]++;
-        break;
-    case 6:
-        need[1]++; need[2]++;
-        break;
-    case 7:
-        need[3]++; need[4]++; need[5]++;
-        break;
-    case 8:
-        need[6]++;
-        break;
-    case 9:
-        need[0]++; need[1]++; need[2]++; need[3]++; need[4]++; need[5]++; need[6]++;
-        break;
-
-    default:
-        break;
-    }
-}
+int need[MATERIAL_TYPE_NUM + 1];
+int occupy[MATERIAL_TYPE_NUM + 1];
 
 // 0代表读地图 1代表读每一帧的控制信息
 bool readUntilOK(int flag) {
@@ -63,7 +31,8 @@ bool readUntilOK(int flag) {
         
         if(0 == flag) {
             for(int i = 0; i < MAP_INPUT_LEN; i++) {
-                need_switch(line[i]- '0');
+                if(line[i] > '0' && line[i] <='9')
+                    bitcount(material[line[i]- '0'], need);
             }
         } else if(1 == flag) {
             sscanf(line, "%d", &money);
@@ -102,15 +71,13 @@ int main() {
     #ifdef DEBUG
     fp = fopen ("debug.txt", "w");
     #endif
-
     readUntilOK(0);
+    for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
+        debug("myneed[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
+        occupy[i] = 0;
+    }
     puts("OK");
     fflush(stdout);
-
-    for(int i = 0; i < MATERIAL_TYPE_NUM; i++) {
-        debug("need[%d]:%d\t", i+1, need[i]);
-        need_test[i] = need[i];
-    }
 
     int frameID;
 
@@ -119,17 +86,13 @@ int main() {
         readUntilOK(1);
         printf("%d\n", frameID);
         
-        for(int i = 0; i < MATERIAL_TYPE_NUM; i++) {
-            debug("need[%d]:%d should be %d-%d-%d\t", i, need[i], need_test[i], need_test2[i], need_test3[i]);
-            if(need[i] != need_test[i] - need_test2[i] - need_test3[i])
-                debug("error\n");
-            need_test2[i] = 0;
-            need_test3[i] = 0;
-        }
-        debug("\n");
-
         for(int robotId = 0; robotId < ROBOT_NUM; robotId++){
             robots[robotId].loop();
+        }
+
+        for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
+            debug("myneed[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
+            occupy[i] = 0;
         }
 
         printf("OK\n");

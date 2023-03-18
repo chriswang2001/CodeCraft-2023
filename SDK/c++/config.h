@@ -17,3 +17,11 @@
 #define WORK_BENCH_NUM_MAX 50
 #define WORK_BENCH_TYPE_NUM 9
 #define MATERIAL_TYPE_NUM 7
+
+extern int material[WORK_BENCH_TYPE_NUM + 1];
+
+extern int profit[MATERIAL_TYPE_NUM + 1];
+
+extern int find[MATERIAL_TYPE_NUM + 1][WORK_BENCH_TYPE_NUM];
+
+void bitcount(int num, int* arr);
