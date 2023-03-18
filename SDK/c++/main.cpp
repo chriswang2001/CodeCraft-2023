@@ -18,6 +18,9 @@ work_bench work_benches[WORK_BENCH_NUM_MAX];
 robot robots[ROBOT_NUM];
 
 int need[MATERIAL_TYPE_NUM];
+int need_test[MATERIAL_TYPE_NUM];
+int need_test2[MATERIAL_TYPE_NUM];
+int need_test3[MATERIAL_TYPE_NUM];
 
 void need_switch(int type) {
     if(type >= 4 && type <= 9)
@@ -72,7 +75,7 @@ bool readUntilOK(int flag) {
             flag = 3;
         } else if(3 == flag) {
             work_benches[count].read(line, count);
-            // work_benches[count].print();
+            work_benches[count].print();
 
             if(++count >= work_bench_num) {
                 flag = 4;
@@ -80,7 +83,7 @@ bool readUntilOK(int flag) {
             }
         } else if(4 == flag) {
             robots[count].read(line, count);
-            // robots[count].print();
+            robots[count].print();
 
             if(++count >= ROBOT_NUM) {
                 flag = 5;
@@ -106,6 +109,7 @@ int main() {
 
     for(int i = 0; i < MATERIAL_TYPE_NUM; i++) {
         debug("need[%d]:%d\t", i+1, need[i]);
+        need_test[i] = need[i];
     }
 
     int frameID;
@@ -115,12 +119,17 @@ int main() {
         readUntilOK(1);
         printf("%d\n", frameID);
         
+        for(int i = 0; i < MATERIAL_TYPE_NUM; i++) {
+            debug("need[%d]:%d should be %d-%d-%d\t", i, need[i], need_test[i], need_test2[i], need_test3[i]);
+            if(need[i] != need_test[i] - need_test2[i] - need_test3[i])
+                debug("error\n");
+            need_test2[i] = 0;
+            need_test3[i] = 0;
+        }
+        debug("\n");
+
         for(int robotId = 0; robotId < ROBOT_NUM; robotId++){
             robots[robotId].loop();
-        }
-
-        for(int i = 0; i < MATERIAL_TYPE_NUM; i++) {
-            debug("need[%d]:%d\t", i+1, need[i]);
         }
 
         printf("OK\n");

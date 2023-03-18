@@ -1,2 +1,8 @@
 .vscode/
 replay/
+
+debug.txt
+
+main
+
+*.o

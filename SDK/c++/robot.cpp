@@ -7,6 +7,8 @@
 #include "config.h"
 #include "main.h"
 
+int material[WORK_BENCH_TYPE_NUM+1] = {0, 0, 0, 0, 0b00000110, 0b00001010, 0b00001100, 0b01110000, 0b10000000, 0b11111110};
+
 int profit[MATERIAL_TYPE_NUM] = {3000, 3200, 3400, 7100, 7800, 8300, 29000};
 
 int find0[MATERIAL_TYPE_NUM] ={1,2,3,4,5,6,7};
@@ -31,8 +33,15 @@ bool robot::read(const char* buffer, int ID) {
             &this->work_bench_ID, &this->material_type, &this->time_factor, &this->collision_factor,
             &this->angular_vel, &this->linear_vel_x, &this->linear_vel_y, 
             &this->th, &this->x, &this->y)) {
+                if(this->material_type) {
+                    need_test2[material_type-1]++;
+                } else if(target_ID != -1){
+                    need_test2[target_Type - 1]++;
+                }
             return true;
         }
+    
+
 
     return false;
 }
@@ -149,16 +158,21 @@ void robot::control() {
             debug("buy %d\n", this->ID);
             if(!work_benches[target_ID].getProduct())
                 goto end;
-            
-            need_switch(this->target_Type);
+
+            if(work_benches[target_ID].getMaterial() == material[this->target_Type])
+                need_switch(this->target_Type);
         } else {
             printf("sell %d\n", this->ID);
             debug("sell %d\n", this->ID);
-            if(!work_benches[target_ID].checkMaterial(this->material_type)) {
-                work_benches[target_ID].setMaterial(this->material_type);
-                if(this->target_Type == 8 || (this->target_Type == 9 && work_benches[target_ID].getMaterial() == 0x11111110) ){
-                    need_switch(this->target_Type);
-                }
+            if(work_benches[target_ID].checkMaterial(this->material_type)) {
+                debug("error2");
+                goto end;
+            }
+
+            work_benches[target_ID].setMaterial(this->material_type);
+            debug("material:%d %d", work_benches[target_ID].getMaterial(), material[this->target_Type]);
+            if(work_benches[target_ID].getMaterial() == material[this->target_Type] && work_benches[target_ID].getTime() == -1) {
+                need_switch(this->target_Type);
             }
         }
 
