@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "work_bench.h"
+#include "workbench.h"
 #include "robot.h"
 #include "config.h"
 
@@ -12,9 +12,9 @@ using namespace std;
 FILE * fp;
 #endif
 
-int money, work_bench_num;
+int money, workbench_num;
 
-work_bench work_benches[WORK_BENCH_NUM_MAX];
+workbench workbenches[WORKBENCH_NUM_MAX];
 robot robots[ROBOT_NUM];
 
 int need[MATERIAL_TYPE_NUM + 1];
@@ -39,14 +39,14 @@ bool readUntilOK(int flag) {
             // debug("money: %ld\n", money);
             flag = 2;
         } else if(2 == flag) {
-            sscanf(line, "%d", &work_bench_num);
-            // debug("worknum: %d\n", work_bench_num);
+            sscanf(line, "%d", &workbench_num);
+            // debug("worknum: %d\n", workbench_num);
             flag = 3;
         } else if(3 == flag) {
-            work_benches[count].read(line, count);
-            work_benches[count].print();
+            workbenches[count].read(line, count);
+            workbenches[count].print();
 
-            if(++count >= work_bench_num) {
+            if(++count >= workbench_num) {
                 flag = 4;
                 count = 0;
             }
@@ -73,7 +73,7 @@ int main() {
     #endif
     readUntilOK(0);
     for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
-        debug("myneed[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
+        debug("need[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
         occupy[i] = 0;
     }
     puts("OK");
@@ -91,7 +91,7 @@ int main() {
         }
 
         for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
-            debug("myneed[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
+            debug("need[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
             occupy[i] = 0;
         }
 

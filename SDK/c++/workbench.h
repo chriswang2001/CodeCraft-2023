@@ -1,6 +1,6 @@
 #pragma once
 
-class work_bench
+class workbench
 {
 private:
     int ID;
@@ -14,9 +14,9 @@ private:
     int product_state;
 
 public:
-    work_bench();
+    workbench();
 
-    bool read(const char* buffer, int ID);
+    bool read(const char* buffer, int id);
     void print();
 
     double getx();
@@ -32,5 +32,5 @@ public:
     int getProduct();
 
     int getRobotID();
-    void setRobotID(int robot_ID);
+    void setRobotID(int robot_id);
 };

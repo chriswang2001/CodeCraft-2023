@@ -14,14 +14,14 @@
 #define ANGULAR_LIMIT 0.15f
 #define DISTANCE_LIMIT 0.5f
 
-#define WORK_BENCH_NUM_MAX 50
-#define WORK_BENCH_TYPE_NUM 9
+#define WORKBENCH_NUM_MAX 50
+#define WORKBENCH_TYPE_NUM 9
 #define MATERIAL_TYPE_NUM 7
 
-extern int material[WORK_BENCH_TYPE_NUM + 1];
+extern int material[WORKBENCH_TYPE_NUM + 1];
 
 extern int profit[MATERIAL_TYPE_NUM + 1];
 
-extern int find[MATERIAL_TYPE_NUM + 1][WORK_BENCH_TYPE_NUM];
+extern int find[MATERIAL_TYPE_NUM + 1][WORKBENCH_TYPE_NUM];
 
 void bitcount(int num, int* arr);

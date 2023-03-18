@@ -204,32 +204,32 @@ robot.cpp.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/robot.cpp.s
 .PHONY : robot.cpp.s
 
-work_bench.o: work_bench.cpp.o
+workbench.o: workbench.cpp.o
 
-.PHONY : work_bench.o
+.PHONY : workbench.o
 
 # target to build an object file
-work_bench.cpp.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/work_bench.cpp.o
-.PHONY : work_bench.cpp.o
+workbench.cpp.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/workbench.cpp.o
+.PHONY : workbench.cpp.o
 
-work_bench.i: work_bench.cpp.i
+workbench.i: workbench.cpp.i
 
-.PHONY : work_bench.i
+.PHONY : workbench.i
 
 # target to preprocess a source file
-work_bench.cpp.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/work_bench.cpp.i
-.PHONY : work_bench.cpp.i
+workbench.cpp.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/workbench.cpp.i
+.PHONY : workbench.cpp.i
 
-work_bench.s: work_bench.cpp.s
+workbench.s: workbench.cpp.s
 
-.PHONY : work_bench.s
+.PHONY : workbench.s
 
 # target to generate assembly for a file
-work_bench.cpp.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/work_bench.cpp.s
-.PHONY : work_bench.cpp.s
+workbench.cpp.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/workbench.cpp.s
+.PHONY : workbench.cpp.s
 
 # Help Target
 help:
@@ -249,9 +249,9 @@ help:
 	@echo "... robot.o"
 	@echo "... robot.i"
 	@echo "... robot.s"
-	@echo "... work_bench.o"
-	@echo "... work_bench.i"
-	@echo "... work_bench.s"
+	@echo "... workbench.o"
+	@echo "... workbench.i"
+	@echo "... workbench.s"
 .PHONY : help
 
 

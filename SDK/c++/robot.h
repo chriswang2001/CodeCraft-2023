@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "work_bench.h"
+#include "workbench.h"
 
 class robot
 {
@@ -14,7 +14,7 @@ private:
     double linear_set;
     double angular_set;
 
-    int work_bench_ID;
+    int workbench_ID;
     int material_type;
     double time_factor;
     double collision_factor;
@@ -25,16 +25,20 @@ private:
     double x;
     double y;
 
-    double score(work_bench& wb);
-    void set(int target_ID);
+    double get_dx();
+    double get_dy();
+    double get_dth();
 
+    double get_score(workbench& wb);
+    void set(int target_id);
+
+    void plan();
+    void control();
 public:
     robot();
 
-    bool read(const char* buffer, int ID);
+    bool read(const char* buffer, int id);
     void print();
 
     void loop();
-    void plan();
-    void control();
 };

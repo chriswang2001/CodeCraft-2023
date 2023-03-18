@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "config.h"
-#include "work_bench.h"
+#include "workbench.h"
 
 #define DEBUG
 
@@ -14,8 +14,8 @@ extern FILE* fp;
 #define debug(fmt, ...)
 #endif
 
-extern int work_bench_num;
-extern work_bench work_benches[WORK_BENCH_NUM_MAX];
+extern int workbench_num;
+extern workbench workbenches[WORKBENCH_NUM_MAX];
 
 extern int need[MATERIAL_TYPE_NUM + 1];
 extern int occupy[MATERIAL_TYPE_NUM + 1];

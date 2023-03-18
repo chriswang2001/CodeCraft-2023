@@ -8,19 +8,19 @@
 #include "main.h"
 
 robot::robot() {
-    this->target_ID = -1;
+    target_ID = -1;
 }
 
-bool robot::read(const char* buffer, int ID) {  
-    this->ID = ID;
+bool robot::read(const char* buffer, int id) {  
+    ID = id;
     if(EOF != sscanf(buffer, "%d %d %lf %lf %lf %lf %lf %lf %lf %lf",
-            &this->work_bench_ID, &this->material_type, &this->time_factor, &this->collision_factor,
-            &this->angular_vel, &this->linear_vel_x, &this->linear_vel_y, 
-            &this->th, &this->x, &this->y)) {
-                if(this->material_type) {
-                    occupy[this->material_type]++;
+            &workbench_ID, &material_type, &time_factor, &collision_factor,
+            &angular_vel, &linear_vel_x, &linear_vel_y, 
+            &th, &x, &y)) {
+                if(material_type) {
+                    occupy[material_type]++;
                 } else if(target_ID != -1){
-                    occupy[this->target_Type]++;
+                    occupy[target_Type]++;
                 }
             return true;
         }
@@ -29,22 +29,54 @@ bool robot::read(const char* buffer, int ID) {
 }
 
 void robot::print() {
-    debug("robot[%d]: wb:%d material:%d factor%lf %lf vel:%lf %lf %lf th:%lf pos:%lf %lf target:%d type:%d\n", this->ID,
-            this->work_bench_ID, this->material_type, this->time_factor, this->collision_factor,
-            this->angular_vel, this->linear_vel_x, this->linear_vel_y, 
-            this->th, this->x, this->y, this->target_ID, this->target_Type);
+    debug("robot[%d]: wb:%d material:%d factor%lf %lf vel:%lf %lf %lf th:%lf pos:%lf %lf target:%d type:%d\n", ID,
+            workbench_ID, material_type, time_factor, collision_factor,
+            angular_vel, linear_vel_x, linear_vel_y, 
+            th, x, y, target_ID, target_Type);
 }
 
-double robot::score(work_bench& wb) {
+double robot::get_dx() {
+    if(target_ID == -1)
+        return 0;
+    
+    return workbenches[target_ID].getx() - x;
+}
+
+double robot::get_dy() {
+    if(target_ID == -1)
+        return 0;
+    
+    return workbenches[target_ID].gety() - y;
+}
+
+double robot::get_dth() {
+    if(target_ID == -1)
+        return 0;
+    
+    double dth = atan2f(get_dy(), get_dx()) - th;
+    if(dth < -M_PI)
+        dth += 2 * M_PI;
+    else if(dth > M_PI)
+        dth -= 2 * M_PI;
+
+    return dth;
+}
+
+double robot::get_score(workbench& wb) {
     int score = 0;
     int time = wb.getTime();
     int type = wb.getType();
     
-    //     debug("%s %d\n", __func__, __LINE__);
+    int *arr = find[material_type];
+    int n = WORKBENCH_TYPE_NUM;
+    if(wb.getRobotID() != -1 || std::find(arr, arr + n, wb.getType()) == arr + n)
+    {
+        return 0;
+    }
 
-    if(0 == this->material_type) {
+    if(0 == material_type) {
         if(time < 0 || need[type] - occupy[type] <= 0) {
-        // debug("%s %d\n", __func__, __LINE__);
+
             return 0;
         }
 
@@ -55,26 +87,16 @@ double robot::score(work_bench& wb) {
         }
         score += profit[wb.getType()] * 1.5f;
     } else {
-        if(wb.checkMaterial(this->material_type)) {
+        if(wb.checkMaterial(material_type)) {
             return 0;
         }
     }
 
-    int *arr = find[this->material_type];
-    int n = WORK_BENCH_TYPE_NUM;
-    if(wb.getRobotID() != -1 || std::find(arr, arr + n, wb.getType()) == arr + n)
-    {
-        // debug("%d %d %d", arr[0], n, std::find(arr, arr + n, wb.getType()));
-        // debug("%s %d\n", __func__, __LINE__);
-        return 0;
-    }
-
-    double dx = wb.getx() - this->x;
-    double dy = wb.gety() - this->y;
+    double dx = wb.getx() - x;
+    double dy = wb.gety() - y;
     double d2 = dx*dx + dy*dy;
 
     score += MAP_MAX_LEN * MAP_MAX_LEN / d2;
-    //     debug("%s %d\n", __func__, __LINE__);
 
     return score;
 }
@@ -83,12 +105,10 @@ void robot::plan() {
     int max_score = 0;
     int max_score_id = -1;
 
-    //     debug("%s %d\n", __func__, __LINE__);
-
-    for(int i = 0; i < work_bench_num; i++) {
-        int score = this->score(work_benches[i]);
+    for(int i = 0; i < workbench_num; i++) {
+        int score = get_score(workbenches[i]);
         // debug("score[%d]:%d\n", i, score);
-        // work_benches[i].print();
+        // workbenches[i].print();
         if(score > max_score) {
             max_score = score;
             max_score_id = i;
@@ -96,22 +116,20 @@ void robot::plan() {
     }
 
     if(max_score_id >= 0) {
-        this->set(max_score_id);
+        set(max_score_id);
     } else {
-        // debug("", );
-        // printf("destroy %d\n", this->ID);
+        debug("error in %s-%d\n", __func__, __LINE__);
+        // printf("destroy %d\n", ID);
     }
-
-    //     debug("%s %d\n", __func__, __LINE__);
 }
 
-void robot::set(int target_ID) {
+void robot::set(int target_id) {
     //     debug("%s %d\n", __func__, __LINE__);
 
-    this->target_ID = target_ID;
-    this->target_Type = work_benches[target_ID].getType();
+    target_ID = target_id;
+    target_Type = workbenches[target_ID].getType();
 
-    work_benches[target_ID].setRobotID(this->ID);
+    workbenches[target_ID].setRobotID(ID);
 
     //     debug("%s %d\n", __func__, __LINE__);
 }
@@ -120,78 +138,64 @@ void robot::control() {
     double dx, dy, dth;
     //     debug("%s %d\n", __func__, __LINE__);
 
-    if(this->target_ID < 0)
+    if(target_ID < 0)
         return;
     
-    if(work_benches[target_ID].getID() == this->work_bench_ID) {
-        this->linear_set = 0;
-        this->angular_set = 0;
+    if(workbenches[target_ID].getID() == workbench_ID) {
+        linear_set = 0;
+        angular_set = 0;
 
-        if(0 == this->material_type) {
-            printf("buy %d\n", this->ID);
-            debug("buy %d\n", this->ID);
-            if(!work_benches[target_ID].getProduct())
+        if(0 == material_type) {
+            printf("buy %d\n", ID);
+            debug("buy %d\n", ID);
+            if(!workbenches[target_ID].getProduct())
                 goto end;
         } else {
-            printf("sell %d\n", this->ID);
-            debug("sell %d\n", this->ID);
-            if(work_benches[target_ID].checkMaterial(this->material_type)) {
-                debug("error2");
+            printf("sell %d\n", ID);
+            debug("sell %d\n", ID);
+            if(workbenches[target_ID].checkMaterial(material_type)) {
+                debug("error in %s-%d\n", __func__, __LINE__);
                 goto end;
             }
 
-            work_benches[target_ID].setMaterial(this->material_type);
+            workbenches[target_ID].setMaterial(material_type);
         }
 
-        work_benches[target_ID].setRobotID(-1);
-        this->target_ID = -1;
+        workbenches[target_ID].setRobotID(-1);
+        target_ID = -1;
         goto end;
     }
     
-    dx = work_benches[target_ID].getx() - x;
-    dy = work_benches[target_ID].gety()- y;
-    dth = atan2f(dy, dx) - this->th;
-    if(dth < -M_PI)
-        dth += 2 * M_PI;
-    else if(dth > M_PI)
-        dth -= 2 * M_PI;
+    dx = get_dx();
+    dy = get_dy();
+    dth = get_dth();
     
     if(fabsf(dth) < ANGULAR_LIMIT) {
-        this->angular_set = 0;
-        this->linear_set = MAX_LINEAR_VEL;
+        angular_set = 0;
+        linear_set = MAX_LINEAR_VEL;
     } else{
         if(dth > 0) {
-            this->angular_set = MAX_ANGULAR_VEL;
+            angular_set = MAX_ANGULAR_VEL;
         } else {
-            this->angular_set = -MAX_ANGULAR_VEL;
+            angular_set = -MAX_ANGULAR_VEL;
         }
 
-        this->linear_set = 0;
+        linear_set = 0;
     }
 
 end:
-    // debug("robot:%d set:%d\t", this->ID, this->target_ID);
-    // debug("dx:%lf dy:%lf dth:%lf atan2:%lf\t", dx, dy, dth, atan2f(dy, dx));
-    // debug("control: %lf %lf\n", this->linear_set, this->angular_set);
-
-    printf("forward %d %lf\n", this->ID, this->linear_set);
-    printf("rotate %d %lf\n", this->ID, this->angular_set);
-
-    //     debug("%s %d\n", __func__, __LINE__);
+    printf("forward %d %lf\n", ID, linear_set);
+    printf("rotate %d %lf\n", ID, angular_set);
 }
 
 
 void robot::loop() {
-    //     debug("%s %d\n", __func__, __LINE__);
-
-    if(-1 == this->target_ID) {
-        this->plan();
+    if(-1 == target_ID) {
+        plan();
     }
 
 
-    this->control();
+    control();
 
-    this->print();
-
-    //     debug("%s %d\n", __func__, __LINE__);
+    print();
 }
