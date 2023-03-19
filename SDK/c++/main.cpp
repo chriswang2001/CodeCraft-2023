@@ -79,10 +79,16 @@ int main() {
     puts("OK");
     fflush(stdout);
 
-    int frameID;
+    int frameID, preFrameID = 0;
 
     while (scanf("%d", &frameID) != EOF) {
         debug("\nframe %d\n", frameID);
+        
+        if(frameID != preFrameID + 1) {
+            debug("error in %s-%d\n", __func__, __LINE__);
+        }
+        preFrameID = frameID;
+
         readUntilOK(1);
         printf("%d\n", frameID);
         

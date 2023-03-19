@@ -119,8 +119,6 @@ void robot::plan() {
 
     for(int i = 0; i < workbench_num; i++) {
         int score = get_score(workbenches[i]);
-        // debug("score[%d]:%d\n", i, score);
-        // workbenches[i].print();
         if(score > max_score) {
             max_score = score;
             max_score_id = i;
@@ -136,19 +134,15 @@ void robot::plan() {
 }
 
 void robot::set(int target_id) {
-    //     debug("%s %d\n", __func__, __LINE__);
 
     target_ID = target_id;
     target_Type = workbenches[target_ID].getType();
 
     workbenches[target_ID].setRobotID(ID);
-
-    //     debug("%s %d\n", __func__, __LINE__);
 }
 
 void robot::control() {
     double dx, dy, dth;
-    //     debug("%s %d\n", __func__, __LINE__);
 
     if(target_ID < 0)
         return;
