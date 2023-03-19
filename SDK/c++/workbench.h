@@ -28,6 +28,7 @@ public:
 
     bool checkMaterial(int type);
     void setMaterial(int type);
+    int needMaterial();
 
     void setRobot(int type);
     void unsetRobot(int type);

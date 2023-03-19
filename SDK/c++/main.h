@@ -14,6 +14,8 @@ extern FILE* fp;
 #define debug(fmt, ...)
 #endif
 
+extern  int frameID;
+
 extern int workbench_num;
 extern workbench workbenches[WORKBENCH_NUM_MAX];
 

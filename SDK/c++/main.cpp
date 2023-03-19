@@ -12,6 +12,8 @@ using namespace std;
 FILE * fp;
 #endif
 
+int frameID, preFrameID;
+
 int money, workbench_num;
 
 workbench workbenches[WORKBENCH_NUM_MAX];
@@ -78,8 +80,6 @@ int main() {
     }
     puts("OK");
     fflush(stdout);
-
-    int frameID, preFrameID = 0;
 
     while (scanf("%d", &frameID) != EOF) {
         debug("\nframe %d\n", frameID);

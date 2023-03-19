@@ -59,6 +59,10 @@ void workbench::setMaterial(int type) {
     material_state |= (1 << type);
 }
 
+int workbench::needMaterial() {
+    return bitcount(material[type] - material_state);
+}
+
 void workbench::setRobot(int type) {
     robot_state |= (1 << type);
 }

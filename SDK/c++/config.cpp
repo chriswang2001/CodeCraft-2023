@@ -28,6 +28,20 @@ double factor(double x, double max_x, double min_rate) {
     return (1- temp_b)*(1-min_rate) + min_rate;
 }
 
+int bitcount(int num) {
+    int count = 0;
+
+    while(num != 0)
+    {
+        if(num & 1)
+            count++;
+        
+        num = num >> 1;
+    }
+
+    return count;
+}
+
 void bitcount(int num, int* arr) {
     int count = 0;
 

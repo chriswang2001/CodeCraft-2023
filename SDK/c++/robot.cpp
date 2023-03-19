@@ -107,7 +107,7 @@ double robot::get_score(workbench& wb) {
             return 0;
         }
         time = time_estimate(wb);
-        money = profit[material_type] * factor(time, 9000, 0.8);
+        money = profit[target_Type] / wb.needMaterial() * factor(time, 9000, 0.8);
     }
 
     double score = money / time;
@@ -155,6 +155,9 @@ void robot::control() {
         angular_set = 0;
 
         if(0 == material_type) {
+            if(FRAME_MAX - frameID < FRAME_LIMIT)
+                goto end;
+                        
             printf("buy %d\n", ID);
             debug("buy %d\n", ID);
             if(!workbenches[target_ID].getProduct())
