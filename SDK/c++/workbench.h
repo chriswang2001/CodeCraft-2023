@@ -4,7 +4,7 @@ class workbench
 {
 private:
     int ID;
-    int robot_ID;
+    int robot_state;
 
     int type;
     double x;
@@ -24,13 +24,12 @@ public:
     int getID();
     int getType();
     int getTime();
+    int getProduct();
 
     bool checkMaterial(int type);
     void setMaterial(int type);
-    int getMaterial();
 
-    int getProduct();
-
-    int getRobotID();
-    void setRobotID(int robot_id);
+    void setRobot(int type);
+    void unsetRobot(int type);
+    bool checkRobot(int type);
 };

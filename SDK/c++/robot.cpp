@@ -87,8 +87,9 @@ double robot::get_score(workbench& wb) {
     
     int *arr = find[material_type];
     int n = WORKBENCH_TYPE_NUM;
-    if(wb.getRobotID() != -1 || std::find(arr, arr + n, wb.getType()) == arr + n)
+    if(wb.checkRobot(material_type) || std::find(arr, arr + n, wb.getType()) == arr + n)
     {
+        // debug("error in %s-%d\n", __func__, __LINE__);
         return 0;
     }
 
@@ -102,6 +103,7 @@ double robot::get_score(workbench& wb) {
         money = profit[wb_type];
     } else {
         if(wb.checkMaterial(material_type)) {
+        // debug("error in %s-%d\n", __func__, __LINE__);
             return 0;
         }
         time = time_estimate(wb);
@@ -109,7 +111,7 @@ double robot::get_score(workbench& wb) {
     }
 
     double score = money / time;
-
+    // debug("error in %s-%d\n", __func__, __LINE__);
     return score;
 }
 
@@ -119,6 +121,7 @@ void robot::plan() {
 
     for(int i = 0; i < workbench_num; i++) {
         int score = get_score(workbenches[i]);
+        // debug("score[%d]:%d ", i, score);
         if(score > max_score) {
             max_score = score;
             max_score_id = i;
@@ -138,7 +141,7 @@ void robot::set(int target_id) {
     target_ID = target_id;
     target_Type = workbenches[target_ID].getType();
 
-    workbenches[target_ID].setRobotID(ID);
+    workbenches[target_ID].setRobot(material_type);
 }
 
 void robot::control() {
@@ -167,7 +170,7 @@ void robot::control() {
             workbenches[target_ID].setMaterial(material_type);
         }
 
-        workbenches[target_ID].setRobotID(-1);
+        workbenches[target_ID].unsetRobot(material_type);
         target_ID = -1;
         goto end;
     }
