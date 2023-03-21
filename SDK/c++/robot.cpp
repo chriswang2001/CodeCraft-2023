@@ -28,7 +28,7 @@ bool robot::read(const char* buffer, int id) {
     return false;
 }
 
-void robot::print() {
+void robot::show() {
     debug("robot[%d]: wb:%d material:%d factor%lf %lf vel:%lf %lf %lf th:%lf pos:%lf %lf target:%d type:%d\n", ID,
             workbench_ID, material_type, time_factor, collision_factor,
             angular_vel, linear_vel_x, linear_vel_y, 
@@ -52,14 +52,9 @@ double robot::get_dy() {
 double robot::get_dth() {
     if(target_ID == -1)
         return 0;
-    
-    double dth = atan2f(get_dy(), get_dx()) - th;
-    if(dth < -M_PI)
-        dth += 2 * M_PI;
-    else if(dth > M_PI)
-        dth -= 2 * M_PI;
-
-    return dth;
+        
+    double dth = atan2(get_dy(), get_dx()) - th;
+    return th_unified(dth);
 }
 
 double robot::time_estimate(workbench& wb) {
@@ -67,12 +62,7 @@ double robot::time_estimate(workbench& wb) {
     double dy = wb.gety() - y;
     double d = sqrt(dx*dx + dy*dy);
 
-    double dth = atan2f(get_dy(), get_dx()) - th;
-    if(dth < -M_PI)
-        dth += 2 * M_PI;
-    else if(dth > M_PI)
-        dth -= 2 * M_PI;
-
+    double dth = th_unified(atan2(dy, dx) - th);
     double time = d/MAX_LINEAR_VEL + fabs(dth)/MAX_ANGULAR_VEL;
 
     return time;
@@ -116,6 +106,10 @@ double robot::get_score(workbench& wb) {
 }
 
 void robot::plan() {
+    if(-1 != target_ID) {
+        return;
+    }
+
     int max_score = 0;
     int max_score_id = -1;
 
@@ -145,8 +139,6 @@ void robot::set(int target_id) {
 }
 
 void robot::control() {
-    double dx, dy, dth;
-
     if(target_ID < 0)
         return;
     
@@ -156,18 +148,19 @@ void robot::control() {
 
         if(0 == material_type) {
             if(FRAME_MAX - frameID < FRAME_LIMIT)
-                goto end;
+                return;
                         
             printf("buy %d\n", ID);
             debug("buy %d\n", ID);
             if(!workbenches[target_ID].getProduct())
-                goto end;
+                return;
+
         } else {
             printf("sell %d\n", ID);
             debug("sell %d\n", ID);
             if(workbenches[target_ID].checkMaterial(material_type)) {
                 debug("error in %s-%d\n", __func__, __LINE__);
-                goto end;
+                return;
             }
 
             workbenches[target_ID].setMaterial(material_type);
@@ -175,13 +168,12 @@ void robot::control() {
 
         workbenches[target_ID].unsetRobot(material_type);
         target_ID = -1;
-        goto end;
+        return;
     }
     
-    dx = get_dx();
-    dy = get_dy();
-    dth = get_dth();
-    
+    double dth = get_dth();
+    debug("dth:%lf\n", dth);
+
     if(fabs(dth) < ANGULAR_LIMIT) {
         angular_set = 0;
         linear_set = MAX_LINEAR_VEL;
@@ -191,23 +183,26 @@ void robot::control() {
         } else {
             angular_set = -MAX_ANGULAR_VEL;
         }
-
-        linear_set = 0;
+        if(fabs(dth) < M_PI_4) {
+            linear_set = MAX_LINEAR_VEL - 24 * fabs(dth)/ M_PI;
+        } else {
+            linear_set = 0;
+        }
     }
+}
 
-end:
+void robot::print() {
+    debug("robot[%d] linear:%lf angular:%lf\n", ID, linear_set, angular_set);
     printf("forward %d %lf\n", ID, linear_set);
     printf("rotate %d %lf\n", ID, angular_set);
 }
 
-
 void robot::loop() {
-    if(-1 == target_ID) {
-        plan();
-    }
-
+    plan();
 
     control();
 
     print();
+
+    //debug();
 }

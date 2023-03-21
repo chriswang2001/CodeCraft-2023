@@ -40,6 +40,8 @@ public:
     robot();
 
     bool read(const char* buffer, int id);
+    void show();
+
     void print();
 
     void loop();

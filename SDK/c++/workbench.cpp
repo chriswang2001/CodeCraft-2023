@@ -21,7 +21,7 @@ bool workbench::read(const char* buffer, int id) {
     return false;
 }
 
-void workbench::print() {
+void workbench::show() {
     debug("wb[%d] type:%d pos:%lf %lf time:%d material:%d product:%d robot:%d\n", ID,
         type, x, y, 
         time_left, material_state, product_state, robot_state);

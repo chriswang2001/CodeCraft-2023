@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "config.h"
+#include "robot.h"
 #include "workbench.h"
 
 // #define DEBUG
@@ -18,6 +19,8 @@ extern  int frameID;
 
 extern int workbench_num;
 extern workbench workbenches[WORKBENCH_NUM_MAX];
+
+extern robot robots[ROBOT_NUM];
 
 extern int need[MATERIAL_TYPE_NUM + 1];
 extern int occupy[MATERIAL_TYPE_NUM + 1];

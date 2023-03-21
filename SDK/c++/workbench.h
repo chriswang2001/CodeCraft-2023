@@ -17,7 +17,7 @@ public:
     workbench();
 
     bool read(const char* buffer, int id);
-    void print();
+    void show();
 
     double getx();
     double gety();

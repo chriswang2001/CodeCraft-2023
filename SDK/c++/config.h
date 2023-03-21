@@ -15,7 +15,10 @@
 #define MIN_ANGULAR_VEL -M_PI
 
 #define ANGULAR_LIMIT 0.15
-#define DISTANCE_LIMIT 0.5
+#define DISTANCE_LIMIT 3.5
+
+#define ROBOT_RADIUS_WITH_MATERIAL 0.53
+#define ROBOT_RADIUS_WITHOUT_MATERIAL 0.45
 
 #define WORKBENCH_NUM_MAX 50
 #define WORKBENCH_TYPE_NUM 9
@@ -34,3 +37,5 @@ double factor(double x, double max_x, double min_rate);
 
 int bitcount(int num);
 void bitcount(int num, int* arr);
+
+double th_unified(double dth);

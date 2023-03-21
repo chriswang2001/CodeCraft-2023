@@ -46,7 +46,7 @@ bool readUntilOK(int flag) {
             flag = 3;
         } else if(3 == flag) {
             workbenches[count].read(line, count);
-            workbenches[count].print();
+            workbenches[count].show();
 
             if(++count >= workbench_num) {
                 flag = 4;
@@ -54,7 +54,7 @@ bool readUntilOK(int flag) {
             }
         } else if(4 == flag) {
             robots[count].read(line, count);
-            robots[count].print();
+            robots[count].show();
 
             if(++count >= ROBOT_NUM) {
                 flag = 5;
@@ -69,15 +69,24 @@ bool readUntilOK(int flag) {
     return false;
 }
 
+void printUtilOK() {
+        printf("%d\n", frameID);
+        
+        for(int robotId = 0; robotId < ROBOT_NUM; robotId++) {
+            robots[robotId].loop();
+        }
+
+        printf("OK\n");
+
+        fflush(stdout);
+}
+
 int main() {
     #ifdef DEBUG
     fp = fopen ("debug.txt", "w");
     #endif
     readUntilOK(0);
-    for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
-        debug("need[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
-        occupy[i] = 0;
-    }
+
     puts("OK");
     fflush(stdout);
 
@@ -89,20 +98,13 @@ int main() {
         }
         preFrameID = frameID;
 
-        readUntilOK(1);
-        printf("%d\n", frameID);
-        
-        for(int robotId = 0; robotId < ROBOT_NUM; robotId++){
-            robots[robotId].loop();
-        }
-
         for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
-            debug("need[%d]:%d(%d-%d) ", i, need[i] - occupy[i], need[i], occupy[i]);
             occupy[i] = 0;
         }
 
-        printf("OK\n");
-        fflush(stdout);
+        readUntilOK(1);
+
+        printUtilOK();
     }
 
 #ifdef DEBUG

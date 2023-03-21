@@ -54,3 +54,12 @@ void bitcount(int num, int* arr) {
         count++;
     }
 }
+
+double th_unified(double dth) {
+    if(dth < -M_PI)
+        dth += 2 * M_PI;
+    else if(dth > M_PI)
+        dth -= 2 * M_PI;
+    
+    return dth;
+}
