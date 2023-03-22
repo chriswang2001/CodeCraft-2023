@@ -84,7 +84,13 @@ double robot::get_score(workbench& wb) {
     }
 
     if(0 == material_type) {
-        if(wb_time < 0 || need[wb_type] - occupy[wb_type] <= 0) {
+        if(need[wb_type] - occupy[wb_type] <= 0) {
+            return 0;
+        }
+
+        if(wb.getProduct()) {
+            wb_time = 0;
+        } else if(wb_time < 0){
             return 0;
         }
 
