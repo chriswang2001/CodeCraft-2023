@@ -19,8 +19,7 @@ int money, workbench_num;
 workbench workbenches[WORKBENCH_NUM_MAX];
 robot robots[ROBOT_NUM];
 
-int need[MATERIAL_TYPE_NUM + 1];
-int occupy[MATERIAL_TYPE_NUM + 1];
+list<int> need[MATERIAL_TYPE_NUM + 1];
 
 // 0代表读地图 1代表读每一帧的控制信息
 bool readUntilOK(int flag) {
@@ -33,8 +32,10 @@ bool readUntilOK(int flag) {
         
         if(0 == flag) {
             for(int i = 0; i < MAP_INPUT_LEN; i++) {
-                if(line[i] > '0' && line[i] <='9')
-                    bitcount(material[line[i]- '0'], need);
+                if(line[i] > '0' && line[i] <='9') {
+                    bitcount(count, material[line[i]- '0'], need);
+                    count++;
+                }
             }
         } else if(1 == flag) {
             sscanf(line, "%d", &money);
@@ -97,10 +98,6 @@ int main() {
             debug("error in %s-%d\n", __func__, __LINE__);
         }
         preFrameID = frameID;
-
-        for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
-            occupy[i] = 0;
-        }
 
         readUntilOK(1);
 

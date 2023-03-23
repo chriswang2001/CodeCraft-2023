@@ -14,7 +14,9 @@ bool workbench::read(const char* buffer, int id) {
     if(EOF != sscanf(buffer, "%d %lf %lf %d %d %d", 
         &type, &x, &y, 
         &time_left, &material_state, &product_state)) {
-            bitcount(material_state, occupy);
+            if(time_left == workframe[type] - 1) {
+                bitcount(ID, material[type], need);
+            }
             return true;
         }
 

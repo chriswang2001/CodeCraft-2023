@@ -10,6 +10,7 @@ class robot
 private:
     int ID;
     int target_ID;
+    int next_ID;
     int target_Type;
     double linear_set;
     double angular_set;
@@ -25,14 +26,18 @@ private:
     double x;
     double y;
 
+    int set_time;
+    int road_time;
+    int buy_time;
+    int sell_time;
+    
     double get_dx();
     double get_dy();
     double get_dth();
 
-    double get_score(workbench& wb);
-    double time_estimate(workbench& wb);
-    
-    void set(int target_id);
+    double get_score(workbench& wb, int& next_id);
+
+    void set(int target_id, int next_id);
 
     void plan();
     void control();

@@ -1,11 +1,25 @@
 #pragma once
 
+#include <iostream>
+#include <list>
+
+// #define DEBUG
+
+#ifdef DEBUG
+extern FILE* fp;
+#define debug(fmt, ...) fprintf(fp, fmt, ##__VA_ARGS__)
+#else
+#define debug(fmt, ...)
+#endif
+
 #define FRAME_MAX 9000
 #define FRAME_LIMIT 500
+#define FRAME_PER_SECOND 50.0
 
 #define MAP_INPUT_LEN 100
 #define MAP_MAX_LEN 50.0
 
+#define MAX_DISTACNE 70.710678
 #define ROBOT_NUM 4
 
 #define MAX_LINEAR_VEL 6.0
@@ -29,13 +43,18 @@
 
 extern int material[WORKBENCH_TYPE_NUM + 1];
 
-extern int profit[MATERIAL_TYPE_NUM + 1];
+extern int buy[MATERIAL_TYPE_NUM + 1];
+extern int sell[MATERIAL_TYPE_NUM + 1];
 
-extern int find[MATERIAL_TYPE_NUM + 1][WORKBENCH_TYPE_NUM];
+extern int workframe[WORKBENCH_TYPE_NUM + 1];
 
 double factor(double x, double max_x, double min_rate);
 
 int bitcount(int num);
-void bitcount(int num, int* arr);
+void bitcount(int id, int num, std::list<int>* arr);
 
 double th_unified(double dth);
+
+double get_distance(double dx, double dy);
+
+int estimate_time(double start_x, double start_y, double end_x, double end_y, double th);

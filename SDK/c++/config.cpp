@@ -4,18 +4,11 @@
 
 int material[WORKBENCH_TYPE_NUM + 1] = {0, 0, 0, 0, 0b00000110, 0b00001010, 0b00001100, 0b01110000, 0b10000000, 0b11111110};
 
-int profit[MATERIAL_TYPE_NUM + 1] = {0, 6000-3000, 7600-4400, 9200-5800, 22500-15400, 25000-17200, 27500-19200, 105000-76000};
+int buy[MATERIAL_TYPE_NUM + 1] = {0, 3000, 4400, 5800, 15400, 17200, 19200, 76000};
+int sell[MATERIAL_TYPE_NUM + 1] = {0, 6000, 7600, 9200, 22500, 25000, 27500, 105000};
 
-int find[MATERIAL_TYPE_NUM + 1][WORKBENCH_TYPE_NUM] = {
-    {1,2,3,4,5,6,7},
-    {4, 5, 9},
-    {4, 6, 9},
-    {5, 6, 9},
-    {7, 9},
-    {7, 9},
-    {7, 9},
-    {8, 9}
-};
+int workframe[WORKBENCH_TYPE_NUM + 1] = {0, 50, 50, 50, 500, 500, 500, 1000, 1, 1};
+
 
 double factor(double x, double max_x, double min_rate) {
     if(x >= max_x) {
@@ -42,13 +35,14 @@ int bitcount(int num) {
     return count;
 }
 
-void bitcount(int num, int* arr) {
+void bitcount(int id, int num, std::list<int>* arr) {
+    // debug("bicount %d num:%d\n", id, num);
     int count = 0;
 
     while(num != 0)
     {
         if(num & 1)
-            arr[count]++;
+            arr[count].push_back(id);
         
         num = num >> 1;
         count++;
@@ -62,4 +56,20 @@ double th_unified(double dth) {
         dth -= 2 * M_PI;
     
     return dth;
+}
+
+double get_distance(double dx, double dy) {
+    return sqrt(dx*dx + dy*dy);
+}
+
+int estimate_time(double start_x, double start_y, double end_x, double end_y, double th) {
+    double dx = end_x - start_x;
+    double dy = end_y - start_y;
+    double d = get_distance(dx, dy);
+
+    double dth = th_unified(atan2(dy, dx) - th);
+
+    double time = d / MAX_LINEAR_VEL + fabs(dth) / MAX_ANGULAR_VEL;
+
+    return time * FRAME_PER_SECOND;
 }
