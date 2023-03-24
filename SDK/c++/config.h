@@ -13,7 +13,9 @@ extern FILE* fp;
 #endif
 
 #define FRAME_MAX 9000
-#define FRAME_LIMIT 500
+#define FRAME_LIMIT 100
+
+#define FRAME_TIME 0.02
 #define FRAME_PER_SECOND 50.0
 
 #define MAP_INPUT_LEN 100
@@ -28,7 +30,7 @@ extern FILE* fp;
 #define MAX_ANGULAR_VEL M_PI
 #define MIN_ANGULAR_VEL -M_PI
 
-#define ANGULAR_LIMIT 0.15
+#define ANGULAR_LIMIT 0.05
 #define DISTANCE_LIMIT 3.5
 
 #define ROBOT_RADIUS_WITH_MATERIAL 0.53
@@ -38,8 +40,13 @@ extern FILE* fp;
 #define WORKBENCH_TYPE_NUM 9
 #define MATERIAL_TYPE_NUM 7
 
+#define DENSITY 20
 #define MAX_TRACTION 250
 #define MAX_MONMENT 50
+
+#define ANGULAR_PID_P 18.0
+#define ANGULAR_PID_I 0.0
+#define ANGULAR_PID_D 0.0
 
 extern int material[WORKBENCH_TYPE_NUM + 1];
 
@@ -55,6 +62,8 @@ void bitcount(int id, int num, std::list<int>* arr);
 
 double th_unified(double dth);
 
+double get_vth(double vel_x, double vel_y);
+double get_linear(double vel_x, double vel_y);
 double get_distance(double dx, double dy);
 
 int estimate_time(double start_x, double start_y, double end_x, double end_y, double th);

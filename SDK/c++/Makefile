@@ -150,6 +150,33 @@ config.cpp.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/config.cpp.s
 .PHONY : config.cpp.s
 
+control.o: control.cpp.o
+
+.PHONY : control.o
+
+# target to build an object file
+control.cpp.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/control.cpp.o
+.PHONY : control.cpp.o
+
+control.i: control.cpp.i
+
+.PHONY : control.i
+
+# target to preprocess a source file
+control.cpp.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/control.cpp.i
+.PHONY : control.cpp.i
+
+control.s: control.cpp.s
+
+.PHONY : control.s
+
+# target to generate assembly for a file
+control.cpp.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/control.cpp.s
+.PHONY : control.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -243,6 +270,9 @@ help:
 	@echo "... config.o"
 	@echo "... config.i"
 	@echo "... config.s"
+	@echo "... control.o"
+	@echo "... control.i"
+	@echo "... control.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

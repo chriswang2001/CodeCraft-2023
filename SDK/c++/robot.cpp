@@ -4,11 +4,13 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include "control.h"
 #include "config.h"
 #include "main.h"
 
 robot::robot() {
     target_ID = -1;
+    PID_Type_Init(&angular_PID, ANGULAR_PID_P, ANGULAR_PID_I, ANGULAR_PID_D, MAX_ANGULAR_VEL);
 }
 
 bool robot::read(const char* buffer, int id) {  
@@ -52,7 +54,25 @@ double robot::get_dth() {
     return th_unified(dth);
 }
 
-double robot::get_score(workbench& wb, int& next_id) {    
+double robot::get_radius() {
+    if(0 == material_type) {
+        return ROBOT_RADIUS_WITHOUT_MATERIAL;
+    }
+
+    return ROBOT_RADIUS_WITH_MATERIAL;
+}
+
+double robot::get_linear_acc() {
+    double radius = get_radius();
+    return MAX_TRACTION / (DENSITY * M_PI * pow(radius, 2.0));
+}
+
+double robot::get_angular_acc() {
+    double radius = get_radius();
+    return MAX_MONMENT / (DENSITY * M_PI * 0.5 * pow(radius, 4.0));
+}
+
+double robot::score_target(workbench& wb, int& next_id) {    
     int wb_time = wb.getTime();
     int wb_type = wb.getType();
         
@@ -78,7 +98,7 @@ double robot::get_score(workbench& wb, int& next_id) {
     for(auto it =l.begin(); it != l.end(); it++) {
         workbench& next_wb = workbenches[*it];
 
-        int sell_time = estimate_time(wb.getx(), wb.gety(), next_wb.getx(), next_wb.gety(), atan2(wb.gety()-y, wb.getx()-x));
+        int sell_time = estimate_time(wb.getx(), wb.gety(), next_wb.getx(), next_wb.gety(), atan2(wb.gety()-y, wb.getx()-x));        
         double buy_profit =  sell[wb_type]*factor(sell_time, 9000, 0.8) - buy[wb_type];
 
         double sell_profit = 0.0;
@@ -88,7 +108,11 @@ double robot::get_score(workbench& wb, int& next_id) {
 
         double score = (double)(buy_profit + sell_profit*0.5) / (buy_time + sell_time);
 
-        debug("wb[%d]-wb[%d]'s socre:%lf buy time:%d money:%lf sell time:%d money:%lf\n", wb.getID(), *it, score, buy_time, buy_profit, sell_time, sell_profit);
+        if(frameID + buy_time + sell_time + FRAME_LIMIT > FRAME_MAX) {
+            score = 0;
+        }
+
+        // debug("wb[%d]-wb[%d]'s socre:%lf buy time:%d money:%lf sell time:%d money:%lf\n", wb.getID(), *it, score, buy_time, buy_profit, sell_time, sell_profit);
         if(score > max_score) {
             max_score = score;
             next_id = *it;
@@ -110,7 +134,7 @@ void robot::plan() {
 
     for(int i = 0; i < workbench_num; i++) {
         int next_id = -1;
-        double score = get_score(workbenches[i], next_id);
+        double score = score_target(workbenches[i], next_id);
         // debug("score[%d]:%lf\n", i, score);
         if(score > max_score) {
             max_score = score;
@@ -120,13 +144,17 @@ void robot::plan() {
     }
 
     if(max_score_id >= 0) {
-        set(max_score_id, max_next_id);
+        set_target(max_score_id, max_next_id);
     } else {
         debug("error in %s-%d\n", __func__, __LINE__);
+        for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
+            debug("need[%d]:%lu ", i, need[i].size());
+        }
+        debug("\n");
     }
 }
 
-void robot::set(int target_id, int next_id) {
+void robot::set_target(int target_id, int next_id) {
 
     target_ID = target_id;
     next_ID = next_id;
@@ -142,85 +170,160 @@ void robot::set(int target_id, int next_id) {
     if(size_before != size_after +1)
         debug("error in %s-%d\n", __func__, __LINE__);
 
-    // workbench& wb = workbenches[target_ID];
-    // workbench& next_wb = workbenches[next_ID];
-    // road_time = estimate_time(x, y, wb.getx(), wb.gety(), th);
-    // buy_time = wb.getTime() - road_time > 0 ? wb.getTime() : road_time;
-    // sell_time = estimate_time(wb.getx(), wb.gety(), next_wb.getx(), next_wb.gety(), atan2(wb.gety()-y, wb.getx()-x));
-    // set_time = frameID;
+    workbench& wb = workbenches[target_ID];
+    workbench& next_wb = workbenches[next_ID];
+    road_frame = estimate_time(x, y, wb.getx(), wb.gety(), th);
+    buy_frame = wb.getTime() - road_frame > 0 ? wb.getTime() : road_frame;
+    sell_frame = estimate_time(wb.getx(), wb.gety(), next_wb.getx(), next_wb.gety(), atan2(wb.gety()-y, wb.getx()-x)) + buy_frame;
+    set_frame = frameID;
 }
 
-void robot::control() {
-    if(target_ID < 0)
-        return;
+bool robot::check_collision(robot& b, double linear, double vth) {
+    double dx = b.x - x;
+    double dy = b.y - y;
+    double d = get_distance(dx, dy);
+
+    if(d >= DISTANCE_LIMIT || d < get_radius() + b.get_radius()) {
+        return false;
+    }
+
+    double th = atan2(dy, dx);
+    double dth = asin( (get_radius() + b.get_radius()) / d);
+
+    double vel_x = linear * cos(vth);
+    double vel_y = linear * sin(vth);
+
+    double dv_th = atan2(vel_y - b.linear_vel_y, vel_x - b.linear_vel_x);
+
+    if(dv_th < th - dth || dv_th > th + dth) {
+        return false;
+    }
     
-    if(workbenches[target_ID].getID() == workbench_ID) {
-        linear_set = 0;
-        angular_set = 0;
+    return true;
+}
 
-        if(0 == material_type) {
-            if(FRAME_MAX - frameID < FRAME_LIMIT)
-                return;
-            
-            // debug("robot[%d] road_time:%d actually:%d\n", ID, road_time, frameID-set_time);
-
-            if(!workbenches[target_ID].getProduct()) {
-                linear_set = MIN_LINEAR_VEL;
-                return;
-            }
-
-            // if(abs(buy_time - frameID + set_time) > 10)
-            //     debug("robot[%d] buy_time:%d actually:%d\n", ID, buy_time, frameID-set_time);
-            printf("buy %d\n", ID);
-            debug("buy %d\n", ID);
-
-            workbenches[target_ID].unsetRobot(material_type);
-            target_ID = next_ID;
-            workbenches[target_ID].setRobot(target_Type);
-            target_Type = workbenches[target_ID].getType();
-        } else {
-            printf("sell %d\n", ID);
-            debug("sell %d\n", ID);
-
-            if(workbenches[target_ID].checkMaterial(material_type)) {
-                debug("error in %s-%d\n", __func__, __LINE__);
-                return;
-            }
-
-            // if(abs(buy_time - frameID + set_time) > 10)
-            //     debug("robot[%d] sell_time:%d actually:%d\n", ID, sell_time, frameID-set_time);
-
-            if(9 == target_Type || 8 == target_Type) {
-                bitcount(target_ID, 1 << material_type, need);
-            }
-            
-            workbenches[target_ID].unsetRobot(material_type);
-            target_ID = -1;
-        }
-    } else {
-        double dth = get_dth();
-        // debug("dth:%lf\n", dth);
-
-        if(fabs(dth) < ANGULAR_LIMIT) {
-            angular_set = 0;
-            linear_set = MAX_LINEAR_VEL;
-        } else{
-            if(dth > 0) {
-                angular_set = MAX_ANGULAR_VEL;
-            } else {
-                angular_set = -MAX_ANGULAR_VEL;
-            }
-            if(fabs(dth) < M_PI_4) {
-                linear_set = MAX_LINEAR_VEL - 24 * fabs(dth)/ M_PI;
-            } else {
-                linear_set = 0;
+bool robot::check_collision(double linear, double vth) {
+    for(int robotId = 0; robotId < ROBOT_NUM; robotId++) {
+        if(robotId != ID) {
+            if(check_collision(robots[robotId], linear, vth)) {
+                // debug("collision check bewteen:%d-%d vel:%lf th:%lf\n", ID, robotId, get_linear(linear_vel_x, linear_vel_y), get_vth(linear_vel_x, linear_vel_y));
+                return true;
             }
         }
     }
+
+    return false;
+}
+
+//碰撞避免 使用velocity obstacle算法
+void robot::avoid_collision() {
+    double raw_v = get_linear(linear_vel_x, linear_vel_y);
+    double raw_v_th = th;
+
+    if(!check_collision(raw_v, raw_v_th)) {
+        return;
+    }
+
+    double linear_acc = get_linear_acc();
+
+    double min_v = raw_v;
+    double min_v_th = raw_v_th;
+
+    double max_score = 0.0;
+    for(double v = 0.0; v <= MAX_LINEAR_VEL; v += 0.5)
+        for(double v_th = -M_PI; v_th <= M_PI; v_th += 0.1) {
+            if(!check_collision(v, v_th)) {
+                double dv_time = fabs(raw_v - v) / linear_acc;
+                double dth_time = fabs(th_unified(raw_v_th - v_th)) / MAX_ANGULAR_VEL;
+                double score = 1 /(dv_time + dth_time);
+                if(score > max_score) {
+                    max_score = score;
+                    min_v = v;
+                    min_v_th = v_th;
+                }
+            }
+        }
+
+    target_v = min_v;
+    target_th = min_v_th;
+    debug("robot%d to avoid collision set v:%lf v_th:%lf\n", ID, target_v, target_th);
+}
+
+void robot::control() {
+    if(target_ID < 0) {
+        target_v = 0.0;
+        target_th = th;
+
+        goto end;
+    }
+
+    double dth;
+
+    if(workbenches[target_ID].getID() == workbench_ID) {
+        if(0 == material_type) {
+            debug("robot[%d] road_time:%d actually:%d\n", ID, road_frame, frameID-set_frame);
+
+            if(!workbenches[target_ID].getProduct()) {
+                target_v = 0.0;
+                target_th = th;
+
+                goto end;
+            } else {
+                if(abs(buy_frame - frameID + set_frame) > 10)
+                    debug("robot[%d] buy_time:%d actually:%d\n", ID, buy_frame, frameID-set_frame);
+                
+                printf("buy %d\n", ID);
+                debug("buy %d\n", ID);
+
+                workbenches[target_ID].unsetRobot(material_type);
+                target_ID = next_ID;
+                workbenches[target_ID].setRobot(target_Type);
+                target_Type = workbenches[target_ID].getType();
+            }
+        } else {
+            if(workbenches[target_ID].checkMaterial(material_type)) {
+                debug("error in %s-%d\n", __func__, __LINE__);
+                printf("destroy %d\n", ID);
+            } else {
+                printf("sell %d\n", ID);
+                debug("sell %d\n", ID);
+
+                if(abs(sell_frame - frameID + set_frame) > 50)
+                    debug("robot[%d] sell_time:%d actually:%d\n", ID, sell_frame, frameID-set_frame);
+
+                if(9 == target_Type || 8 == target_Type) {
+                    bitcount(target_ID, 1 << material_type, need);
+                }
+            }
+
+            workbenches[target_ID].unsetRobot(material_type);
+            target_ID = -1;
+
+            goto end;
+        }
+    }
+
+    dth = get_dth();
+    target_th = th + dth;
+
+    if(fabs(dth) < ANGULAR_LIMIT) {
+        target_v = MAX_LINEAR_VEL;
+    } else if(fabs(dth) < M_PI_4) {
+        target_v = MAX_LINEAR_VEL - 24 * fabs(dth)/ M_PI;
+    } else {
+        target_v = 0;
+    }
+
+end:
+    avoid_collision();
+
+    linear_set = target_v;
+    angular_set = PID_control(&angular_PID, target_th, th, (frameID - preFrameID) * FRAME_TIME);
 }
 
 void robot::print() {
     debug("robot[%d] linear:%lf angular:%lf\n", ID, linear_set, angular_set);
+
     printf("forward %d %lf\n", ID, linear_set);
     printf("rotate %d %lf\n", ID, angular_set);
 }

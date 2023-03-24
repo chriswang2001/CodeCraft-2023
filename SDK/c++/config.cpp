@@ -50,12 +50,22 @@ void bitcount(int id, int num, std::list<int>* arr) {
 }
 
 double th_unified(double dth) {
-    if(dth < -M_PI)
-        dth += 2 * M_PI;
-    else if(dth > M_PI)
-        dth -= 2 * M_PI;
-    
+    while(dth < -M_PI || dth > M_PI) {
+        if(dth < -M_PI)
+            dth += 2 * M_PI;
+        else if(dth > M_PI)
+            dth -= 2 * M_PI;
+    }
+
     return dth;
+}
+
+double get_vth(double vel_x, double vel_y) {
+    return atan2(vel_y, vel_x);
+}
+
+double get_linear(double vel_x, double vel_y) {
+    return sqrt(vel_x*vel_x + vel_y*vel_y);
 }
 
 double get_distance(double dx, double dy) {

@@ -97,11 +97,12 @@ int main() {
         if(frameID != preFrameID + 1) {
             debug("error in %s-%d\n", __func__, __LINE__);
         }
-        preFrameID = frameID;
 
         readUntilOK(1);
 
         printUtilOK();
+
+        preFrameID = frameID;
     }
 
 #ifdef DEBUG

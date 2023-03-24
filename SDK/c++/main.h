@@ -4,7 +4,7 @@
 #include "robot.h"
 #include "workbench.h"
 
-extern  int frameID;
+extern int frameID, preFrameID;
 
 extern int workbench_num;
 extern workbench workbenches[WORKBENCH_NUM_MAX];
