@@ -49,9 +49,13 @@ bool readUntilOK(int flag) {
             for(int i = 0; i < MATERIAL_TYPE_NUM + 1; i++) {
                 if(workbench_num == 50)
                     want[i] = 0.5;
-                else
+                else if(workbench_num == 18)
+                    want[i] = 0.15;
+                else 
                     want[i] = 1.0;
             }
+            if(workbench_num == 18)
+                want[4] = 2.0;
 
             flag = 3;
         } else if(3 == flag) {
