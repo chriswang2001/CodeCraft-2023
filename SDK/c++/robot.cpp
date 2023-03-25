@@ -270,6 +270,10 @@ void robot::avoid_collision() {
 }
 
 void robot::avoid_border() {
+    if(x >= BORDER_LIMIT && x <= MAP_MAX_LEN - BORDER_LIMIT &&
+       y >= BORDER_LIMIT && y <= MAP_MAX_LEN - BORDER_LIMIT)
+       return;
+    
     if(x < BORDER_LIMIT && y < BORDER_LIMIT) {
         if(th < 0 || th > M_PI_2) {
             target_v = 0.0;
@@ -395,9 +399,9 @@ void robot::control() {
     }
 
 end:
-    avoid_border();
     avoid_collision();
-
+    avoid_border();
+    
     linear_set = target_v;
     angular_set = PID_control(&angular_PID, target_th, th, (frameID - preFrameID) * FRAME_TIME);
 }
