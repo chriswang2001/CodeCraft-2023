@@ -200,12 +200,12 @@ bool robot::check_collision(robot& b, double linear, double vth) {
 
     if(d >= DISTANCE_LIMIT) {
         return false;
-    } else if(d < get_radius() + b.get_radius()) {
+    } else if(d < get_radius() + b.get_radius() - ROBOT_RADIUS_ERROR) {
         // target_v = MIN_ANGULAR_VEL;
         return false;
     }
 
-    double dth = asin( (get_radius() + b.get_radius()) / d);
+    double dth = asin( (get_radius() + b.get_radius() - ROBOT_RADIUS_ERROR) / d);
 
     double vel_x = linear * cos(vth);
     double vel_y = linear * sin(vth);
