@@ -26,10 +26,10 @@ bool robot::read(const char* buffer, int id) {
 }
 
 void robot::show() {
-    debug("robot[%d]: wb:%d material:%d factor%lf %lf vel:%lf %lf %lf th:%lf pos:%lf %lf target:%d type:%d\n", ID,
+    debug("robot[%d]: wb:%d material:%d factor%lf %lf vel:%lf %lf %lf th:%lf pos:%lf %lf target:%d next:%d type:%d\n", ID,
             workbench_ID, material_type, time_factor, collision_factor,
             angular_vel, linear_vel_x, linear_vel_y, 
-            th, x, y, target_ID, target_Type);
+            th, x, y, target_ID, next_ID,target_Type);
 }
 
 double robot::get_dx() {
@@ -98,6 +98,9 @@ double robot::score_target(workbench& wb, int& next_id) {
     }
 
     int road_time = estimate_time(x, y, wb.getx(), wb.gety(), th);
+    if(wb_time > road_time + 10) {
+        return 0;
+    }
     int buy_time = wb_time - road_time > 0 ? wb_time : road_time;
 
     double max_score = 0.0;
