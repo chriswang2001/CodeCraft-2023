@@ -50,6 +50,9 @@ private:
     double get_dy();
     double get_dth();
 
+    double get_vel_x();
+    double get_vel_y();
+
     double get_radius();
     double get_linear_acc();
     double get_angular_acc();

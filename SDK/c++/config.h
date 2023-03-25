@@ -13,7 +13,7 @@ extern FILE* fp;
 #endif
 
 #define FRAME_MAX 9000
-#define FRAME_LIMIT 100
+#define FRAME_LIMIT 30
 
 #define FRAME_TIME 0.02
 #define FRAME_PER_SECOND 50.0

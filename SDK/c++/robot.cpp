@@ -54,6 +54,14 @@ double robot::get_dth() {
     return th_unified(dth);
 }
 
+double robot::get_vel_x() {
+    return get_linear(linear_vel_x, linear_vel_y) * cos(th);
+}
+
+double robot::get_vel_y() {
+    return get_linear(linear_vel_x, linear_vel_y) * sin(th);
+}
+
 double robot::get_radius() {
     if(0 == material_type) {
         return ROBOT_RADIUS_WITHOUT_MATERIAL;
@@ -173,8 +181,12 @@ void robot::set_target(int target_id, int next_id) {
 
     workbench& wb = workbenches[target_ID];
     workbench& next_wb = workbenches[next_ID];
-    road_frame = estimate_time(x, y, wb.getx(), wb.gety(), th);
-    buy_frame = wb.getTime() - road_frame > 0 ? wb.getTime() : road_frame;
+    int road_frame = estimate_time(x, y, wb.getx(), wb.gety(), th);
+    int wb_frame = wb.getTime();
+    if(wb.getProduct()) {
+        wb_frame = 0;
+    }
+    buy_frame = wb_frame - road_frame > 0 ? wb_frame : road_frame;
     sell_frame = estimate_time(wb.getx(), wb.gety(), next_wb.getx(), next_wb.gety(), atan2(wb.gety()-y, wb.getx()-x)) + buy_frame;
     set_frame = frameID;
 }
@@ -198,7 +210,7 @@ bool robot::check_collision(robot& b, double linear, double vth) {
     double vel_x = linear * cos(vth);
     double vel_y = linear * sin(vth);
 
-    double dv_th = atan2(vel_y - b.linear_vel_y, vel_x - b.linear_vel_x);
+    double dv_th = atan2(vel_y - b.get_vel_y(), vel_x - b.get_vel_x());
 
     if(dv_th < th - dth || dv_th > th + dth) {
         return false;
@@ -326,7 +338,7 @@ void robot::control() {
 
     if(workbenches[target_ID].getID() == workbench_ID) {
         if(0 == material_type) {
-            debug("robot[%d] road_time:%d actually:%d\n", ID, road_frame, frameID-set_frame);
+            // debug("robot[%d] road_time:%d actually:%d\n", ID, road_frame, frameID-set_frame);
 
             if(!workbenches[target_ID].getProduct()) {
                 target_v = 0.0;
