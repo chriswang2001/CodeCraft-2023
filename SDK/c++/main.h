@@ -12,3 +12,4 @@ extern workbench workbenches[WORKBENCH_NUM_MAX];
 extern robot robots[ROBOT_NUM];
 
 extern std::list<int> need[MATERIAL_TYPE_NUM + 1];
+extern double want[MATERIAL_TYPE_NUM + 1];

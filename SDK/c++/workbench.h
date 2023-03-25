@@ -27,7 +27,7 @@ public:
     int getProduct();
 
     bool checkMaterial(int type);
-    void setMaterial(int type);
+    bool checkNeedMaterial(int type);
     int needMaterial();
 
     void setRobot(int type);

@@ -20,6 +20,7 @@ workbench workbenches[WORKBENCH_NUM_MAX];
 robot robots[ROBOT_NUM];
 
 list<int> need[MATERIAL_TYPE_NUM + 1];
+double want[MATERIAL_TYPE_NUM + 1];
 
 // 0代表读地图 1代表读每一帧的控制信息
 bool readUntilOK(int flag) {
@@ -44,6 +45,14 @@ bool readUntilOK(int flag) {
         } else if(2 == flag) {
             sscanf(line, "%d", &workbench_num);
             // debug("worknum: %d\n", workbench_num);
+
+            for(int i = 0; i < MATERIAL_TYPE_NUM + 1; i++) {
+                if(workbench_num == 50)
+                    want[i] = 0.5;
+                else
+                    want[i] = 1.0;
+            }
+
             flag = 3;
         } else if(3 == flag) {
             workbenches[count].read(line, count);
@@ -100,7 +109,17 @@ int main() {
 
         readUntilOK(1);
 
+        for(int i = 0; i < 8; i++) {
+            debug("want[%d]:%lf\t", i, want[i]);
+        }
+        debug("\n");
+        
         printUtilOK();
+
+        for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
+            debug("need[%d]:%lu ", i, need[i].size());
+        }
+        debug("\n");
 
         preFrameID = frameID;
     }

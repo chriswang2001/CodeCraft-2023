@@ -17,6 +17,23 @@ bool workbench::read(const char* buffer, int id) {
             if(time_left == workframe[type] - 1) {
                 bitcount(ID, material[type], need);
             }
+
+            if(7 == type) {
+                double want_add = 0.0;
+                if(1 == needMaterial()) {
+                    want_add = 0.25;
+                } else if(2 == needMaterial()) {
+                    want_add = 0.15;
+                }
+
+                for(int i = 4; i <=6; i++) {
+                    if(checkNeedMaterial(i)) {
+                        debug("want_add %d:%lf\n", i, want_add);
+                        want[i] += want_add;
+                    }
+                }
+            }
+            
             return true;
         }
 
@@ -57,8 +74,10 @@ bool workbench::checkMaterial(int type) {
     return material_state & (1 << type);
 }
 
-void workbench::setMaterial(int type) {
-    material_state |= (1 << type);
+bool workbench::checkNeedMaterial(int m_type) {
+    int temp = robot_state & ~1;
+    temp = material[type] - material_state - temp;
+    return temp & (1 << m_type);
 }
 
 int workbench::needMaterial() {

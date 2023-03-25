@@ -115,7 +115,9 @@ double robot::score_target(workbench& wb, int& next_id) {
         double sell_profit = 0.0;
         if(next_wb.getType() >=4 && next_wb.getType() <= 7) {
             sell_profit = (double)(sell[next_wb.getType()] - buy[next_wb.getType()]) / next_wb.needMaterial();
-            sell_profit *= need[next_wb.getType()].size()/2.0;
+            sell_profit *= want[next_wb.getType()];
+            if(need[next_wb.getType()].size() <= 0)
+                sell_profit *= 0.5;
         }
 
         double score = (double)(buy_profit + sell_profit) / (buy_time + sell_time);
@@ -124,7 +126,7 @@ double robot::score_target(workbench& wb, int& next_id) {
             score = 0;
         }
 
-        // debug("wb[%d]-wb[%d]'s socre:%lf buy time:%d money:%lf sell time:%d money:%lf\n", wb.getID(), *it, score, buy_time, buy_profit, sell_time, sell_profit);
+        debug("wb[%d]-wb[%d]'s socre:%lf buy time:%d money:%lf sell time:%d money:%lf\n", wb.getID(), *it, score, buy_time, buy_profit, sell_time, sell_profit);
         if(score > max_score) {
             max_score = score;
             next_id = *it;
@@ -147,22 +149,19 @@ void robot::plan() {
     for(int i = 0; i < workbench_num; i++) {
         int next_id = -1;
         double score = score_target(workbenches[i], next_id);
-        // debug("score[%d]:%lf\n", i, score);
+        debug("score[%d]:%lf\t", i, score);
         if(score > max_score) {
             max_score = score;
             max_score_id = i;
             max_next_id = next_id;
         }
     }
+    debug("\n");
 
     if(max_score_id >= 0) {
         set_target(max_score_id, max_next_id);
     } else {
         debug("error in %s-%d\n", __func__, __LINE__);
-        for(int i = 1; i < MATERIAL_TYPE_NUM + 1; i++) {
-            debug("need[%d]:%lu ", i, need[i].size());
-        }
-        debug("\n");
     }
 }
 
@@ -171,9 +170,11 @@ void robot::set_target(int target_id, int next_id) {
     target_ID = target_id;
     next_ID = next_id;
     
-    debug("set: target-%d next-%d\n", target_ID, next_ID);
     target_Type = workbenches[target_ID].getType();
+    debug("set: target-%d(type:%d) next-%d(type:%d)\n", target_ID, target_Type, next_ID, workbenches[next_ID].getType());
+
     workbenches[target_ID].setRobot(material_type);
+    workbenches[next_ID].setRobot(target_Type);
 
     int size_before = need[target_Type].size();
     need[target_Type].remove(next_ID);
@@ -226,9 +227,10 @@ bool robot::check_collision(double linear, double vth) {
     for(int robotId = 0; robotId < ROBOT_NUM; robotId++) {
         if(robotId != ID) {
             if(check_collision(robots[robotId], linear, vth)) {
-                // debug("collision check bewteen:%d-%d vel:%lf th:%lf\n", ID, robotId, get_linear(linear_vel_x, linear_vel_y), get_vth(linear_vel_x, linear_vel_y));
+                // debug("collision check bewteen:%d-%d vel:%lf th:%lf\n", ID, robotId, linear, vth);
                 return true;
             }
+            // debug("collision not check bewteen:%d-%d vel:%lf th:%lf\n", ID, robotId, linear, vth);
         }
     }
 
@@ -361,7 +363,6 @@ void robot::control() {
 
                 workbenches[target_ID].unsetRobot(material_type);
                 target_ID = next_ID;
-                workbenches[target_ID].setRobot(target_Type);
                 target_Type = workbenches[target_ID].getType();
             }
         } else {
