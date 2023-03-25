@@ -60,6 +60,7 @@ private:
     bool check_collision(robot &b, double linear, double vth);
     bool check_collision(double linear, double vth);
     void avoid_collision();
+    void avoid_border();
 
     void plan();
     void control();

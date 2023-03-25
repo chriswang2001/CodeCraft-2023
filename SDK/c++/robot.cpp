@@ -104,9 +104,10 @@ double robot::score_target(workbench& wb, int& next_id) {
         double sell_profit = 0.0;
         if(next_wb.getType() >=4 && next_wb.getType() <= 7) {
             sell_profit = (double)(sell[next_wb.getType()] - buy[next_wb.getType()]) / next_wb.needMaterial();
+            sell_profit *= need[next_wb.getType()].size()/2.0;
         }
 
-        double score = (double)(buy_profit + sell_profit*0.5) / (buy_time + sell_time);
+        double score = (double)(buy_profit + sell_profit) / (buy_time + sell_time);
 
         if(frameID + buy_time + sell_time + FRAME_LIMIT > FRAME_MAX) {
             score = 0;
@@ -181,13 +182,17 @@ void robot::set_target(int target_id, int next_id) {
 bool robot::check_collision(robot& b, double linear, double vth) {
     double dx = b.x - x;
     double dy = b.y - y;
-    double d = get_distance(dx, dy);
 
-    if(d >= DISTANCE_LIMIT || d < get_radius() + b.get_radius()) {
+    double d = get_distance(dx, dy);
+    double th = atan2(dy, dx);
+
+    if(d >= DISTANCE_LIMIT) {
+        return false;
+    } else if(d < get_radius() + b.get_radius()) {
+        // target_v = MIN_ANGULAR_VEL;
         return false;
     }
 
-    double th = atan2(dy, dx);
     double dth = asin( (get_radius() + b.get_radius()) / d);
 
     double vel_x = linear * cos(vth);
@@ -247,6 +252,66 @@ void robot::avoid_collision() {
     target_v = min_v;
     target_th = min_v_th;
     debug("robot%d to avoid collision set v:%lf v_th:%lf\n", ID, target_v, target_th);
+}
+
+void robot::avoid_border() {
+    if(x < BORDER_LIMIT && y < BORDER_LIMIT) {
+        if(th < 0 || th > M_PI_2) {
+            target_v = 0.0;
+            target_th = M_PI_4;
+        } else{
+            target_v = MAX_LINEAR_VEL;
+        }
+    } else if(x < BORDER_LIMIT && y > MAP_MAX_LEN - BORDER_LIMIT) {
+        if(th > 0 || th < -M_PI_2) {
+            target_v = 0.0;
+            target_th = -M_PI_4;
+        } else{
+            target_v = MAX_LINEAR_VEL;
+        }
+    } else if(x > MAP_MAX_LEN - BORDER_LIMIT && y < BORDER_LIMIT) {
+        if(th  < M_PI_2) {
+            target_v = 0.0;
+            target_th = 3.0 * M_PI_4;
+        } else{
+            target_v = MAX_LINEAR_VEL;
+        }
+    } else if(x > MAP_MAX_LEN - BORDER_LIMIT && y > MAP_MAX_LEN - BORDER_LIMIT) {
+        if(th > -M_PI_2) {
+            target_v = 0.0;
+            target_th = -3.0 *M_PI_4;
+        } else{
+            target_v = MAX_LINEAR_VEL;
+        }
+    }else if(x < BORDER_LIMIT) {
+        if(th > M_PI_2 || th < -M_PI_2) {
+            target_v = 0.0;
+            target_th = 0.0;
+        } else {
+            target_v = MAX_LINEAR_VEL;
+        }
+    } else if(x > MAP_MAX_LEN - BORDER_LIMIT) {
+        if(th < M_PI_2 && th > -M_PI_2) {
+            target_v = 0.0;
+            target_th = M_PI;
+        } else {
+            target_v = MAX_LINEAR_VEL;
+        }
+    }else if(y < BORDER_LIMIT) {
+        if(th < 0) {
+            target_v = 0.0;
+            target_th = M_PI_2;
+        } else {
+            target_v = MAX_LINEAR_VEL;
+        }
+    } else if(y > MAP_MAX_LEN - BORDER_LIMIT) {
+        if(th > 0) {
+            target_v = 0.0;
+            target_th = -M_PI_2;
+        } else {
+            target_v = MAX_LINEAR_VEL;
+        }
+    }
 }
 
 void robot::control() {
@@ -315,6 +380,7 @@ void robot::control() {
     }
 
 end:
+    avoid_border();
     avoid_collision();
 
     linear_set = target_v;
