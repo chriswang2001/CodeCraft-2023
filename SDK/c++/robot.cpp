@@ -1,3 +1,6 @@
+// #define alpha1 0.95
+// #define beta1 0.95
+
 #include "robot.h"
 
 #include <iostream>
@@ -120,7 +123,18 @@ double robot::score_target(workbench& wb, int& next_id) {
                 sell_profit *= 0.5;
         }
 
-        double score = (double)(buy_profit + sell_profit) / (buy_time + sell_time);
+        double alpha1=0.5, beta1=0.5;
+        if(workbench_num == 43) {
+            alpha1 = 0.1; beta1 = 0.95;
+        } else if(workbench_num == 25) {
+            // alpha1 = 0.9; beta1 = 0.9;
+        } else if(workbench_num == 50) {
+            // alpha1 = 0.65; beta1 = 0.5;
+        } else if(workbench_num == 18) {
+            alpha1 = 0.2; beta1 = 0.65;
+        }
+
+        double score = (double)(alpha1*buy_profit + (1-alpha1)*sell_profit) / (beta1*buy_time + (1-beta1)*sell_time);
 
         if(frameID + buy_time + sell_time + FRAME_LIMIT > FRAME_MAX) {
             score = 0;
