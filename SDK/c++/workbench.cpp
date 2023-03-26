@@ -70,8 +70,8 @@ int workbench::getProduct() {
     return product_state;
 }
 
-bool workbench::checkMaterial(int type) {
-    return material_state & (1 << type);
+bool workbench::checkMaterial(int m_type) {
+    return material_state & (1 << m_type);
 }
 
 bool workbench::checkNeedMaterial(int m_type) {
@@ -85,14 +85,14 @@ int workbench::needMaterial() {
     return bitcount(material[type] - material_state - temp);
 }
 
-void workbench::setRobot(int type) {
-    robot_state |= (1 << type);
+void workbench::setRobot(int m_type) {
+    robot_state |= (1 << m_type);
 }
 
-void workbench::unsetRobot(int type) {
-    robot_state &= ~(1 << type);
+void workbench::unsetRobot(int m_type) {
+    robot_state &= ~(1 << m_type);
 }
 
-bool workbench::checkRobot(int type) {
-    return robot_state & (1 << type);
+bool workbench::checkRobot(int m_type) {
+    return robot_state & (1 << m_type);
 }

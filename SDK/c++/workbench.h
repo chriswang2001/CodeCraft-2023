@@ -26,11 +26,11 @@ public:
     int getTime();
     int getProduct();
 
-    bool checkMaterial(int type);
-    bool checkNeedMaterial(int type);
+    bool checkMaterial(int m_type);
+    bool checkNeedMaterial(int m_type);
     int needMaterial();
 
-    void setRobot(int type);
-    void unsetRobot(int type);
-    bool checkRobot(int type);
+    void setRobot(int m_type);
+    void unsetRobot(int m_type);
+    bool checkRobot(int m_type);
 };
