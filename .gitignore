@@ -1,6 +1,11 @@
 .vscode/
+
 replay/
+
 CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
 
 debug.txt
 
