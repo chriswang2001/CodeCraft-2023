@@ -1,5 +1,5 @@
-// #define alpha1 0.95
-// #define beta1 0.95
+// #define alpha1 0.245000
+// #define beta1 0.695000
 
 #include "robot.h"
 
@@ -125,13 +125,13 @@ double robot::score_target(workbench& wb, int& next_id) {
 
         double alpha1=0.5, beta1=0.5;
         if(workbench_num == 43) {
-            alpha1 = 0.1; beta1 = 0.95;
+            alpha1 = 0.145; beta1 = 0.995;
         } else if(workbench_num == 25) {
-            alpha1 = 0.9; beta1 = 0.9;
+            alpha1 = 0.9; beta1 = 0.905;
         } else if(workbench_num == 50) {
-            alpha1 = 0.65; beta1 = 0.5;
+            alpha1 = 0.615; beta1 = 0.52;
         } else if(workbench_num == 18) {
-            alpha1 = 0.2; beta1 = 0.65;
+            alpha1 = 0.22; beta1 = 0.695;
         }
 
         double score = (double)(alpha1*buy_profit + (1-alpha1)*sell_profit) / (beta1*buy_time + (1-beta1)*sell_time);
