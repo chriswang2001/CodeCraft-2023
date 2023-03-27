@@ -127,9 +127,9 @@ double robot::score_target(workbench& wb, int& next_id) {
         if(workbench_num == 43) {
             alpha1 = 0.1; beta1 = 0.95;
         } else if(workbench_num == 25) {
-            // alpha1 = 0.9; beta1 = 0.9;
+            alpha1 = 0.9; beta1 = 0.9;
         } else if(workbench_num == 50) {
-            // alpha1 = 0.65; beta1 = 0.5;
+            alpha1 = 0.65; beta1 = 0.5;
         } else if(workbench_num == 18) {
             alpha1 = 0.2; beta1 = 0.65;
         }

@@ -4,7 +4,7 @@ def score():
     # path = '/home/cloud/CLionProjects/HuaweiComp3'
     # f=os.popen('cd '+path)
     # print(f.read())
-    f=os.popen('./myrunall.sh')
+    f=os.popen('./runall.sh')
     string = f.read()
     numbers = []
     pos = string.find('score')
